@@ -314,40 +314,37 @@ body {
   }
 }
 
-/* Portrait entrance — one-shot, right → center (outer wrapper) */
+/* Portrait entrance — elegant subtle upward fade into view (outer wrapper) */
 @keyframes portraitEnter {
   0% {
     opacity: 0;
-    transform: translateX(180px);
-  }
-  60% {
-    opacity: 1;
+    transform: translateY(20px) scale(0.98);
   }
   100% {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0px) scale(1);
   }
 }
 
 .portrait-enter {
-  animation: portraitEnter 2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: portraitEnter 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   will-change: transform, opacity;
 }
 
-/* Portrait float — gentle up/down loop, starts after entrance (inner wrapper) */
+/* Portrait float — gentle, organic breathing float starting after entrance (inner wrapper) */
 @keyframes portraitFloat {
   0%, 100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-6px);
   }
 }
 
 .portrait-float {
-  /* delay matches entrance duration so float begins the moment entrance ends */
-  animation: portraitFloat 4s ease-in-out infinite;
-  animation-delay: 2s;
+  /* delay matches entrance duration so float begins gracefully as entrance completes */
+  animation: portraitFloat 5s ease-in-out infinite;
+  animation-delay: 1.4s;
   animation-fill-mode: backwards;
   will-change: transform;
 }
