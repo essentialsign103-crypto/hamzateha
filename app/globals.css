@@ -1,0 +1,387 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark, .dark *));
+
+:root {
+  --canvas: #f7f6f2;
+  --canvas-sub: #efece6;
+  --canvas-card: #ffffff;
+  --text-primary: #0f1012;
+  --text-secondary: #4a4d56;
+  --text-muted: #858892;
+  --surface-dark: #121316;
+  --surface-dark-sub: #1a1b20;
+  --border-light: rgba(15, 16, 18, 0.08);
+  --border-light-hover: rgba(15, 16, 18, 0.18);
+  --border-dark: rgba(255, 255, 255, 0.08);
+  --border-dark-hover: rgba(255, 255, 255, 0.2);
+  --accent-amber: #d97706;
+  --accent-terracotta: #c25e1a;
+  --accent-azure: #2563eb;
+}
+
+.dark {
+  --canvas: #0e1013;
+  --canvas-sub: #16181d;
+  --canvas-card: #15171c;
+  --text-primary: #f3f4f6;
+  --text-secondary: #a0a4ae;
+  --text-muted: #6b7280;
+  --surface-dark: #1a1d24;
+  --surface-dark-sub: #222630;
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-light-hover: rgba(255, 255, 255, 0.18);
+  --border-dark: rgba(255, 255, 255, 0.12);
+  --border-dark-hover: rgba(255, 255, 255, 0.25);
+  --accent-amber: #f59e0b;
+  --accent-terracotta: #ea580c;
+  --accent-azure: #3b82f6;
+}
+
+#home {
+  background-color: #f5f4f0;
+  color: #111111;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark #home {
+  background-color: #0e1013 !important;
+  color: #f3f4f6 !important;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--canvas);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ensure all section anchors clear the fixed header */
+section[id],
+div[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--text-primary);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Reference site typography & design tokens (miftahfentaw.site) */
+.font-Display {
+  font-family: var(--font-syne), 'Syne', sans-serif;
+}
+
+.font-sans-body {
+  font-family: var(--font-dm-sans), 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Reference Glass Pills, Cards & Buttons */
+.glass-pill {
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.dark .glass-pill {
+  background-color: rgba(21, 23, 28, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.4);
+  color: #f3f4f6;
+}
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.dark .glass-card {
+  background-color: rgba(21, 23, 28, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+}
+
+.glass-card:hover {
+  border-color: rgba(0, 0, 0, 0.16);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.08);
+}
+
+.dark .glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.6);
+}
+
+.btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #0a0a0a;
+  color: #f7f7f5;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.dark .btn-solid {
+  background-color: #f3f4f6;
+  color: #0e1013;
+}
+
+.btn-solid:hover {
+  background-color: #262626;
+  transform: translateY(-1px);
+}
+
+.dark .btn-solid:hover {
+  background-color: #ffffff;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: transparent;
+  color: #0a0a0a;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.dark .btn-outline {
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-outline:hover {
+  border-color: #0a0a0a;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.dark .btn-outline:hover {
+  border-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.footer-name-art {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.15);
+  transition: -webkit-text-stroke 0.3s ease;
+}
+
+.dark .footer-name-art {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Custom architectural hairline borders */
+.border-blueprint {
+  border-color: rgba(15, 16, 18, 0.08);
+}
+
+.border-blueprint-dark {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Subtle architectural dot grid */
+.bg-architectural-dots {
+  background-image: radial-gradient(rgba(15, 16, 18, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-architectural-dots-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Scrollbar refinement */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f7f6f2;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #0e1013;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d0c7;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #2a2e38;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b8b2a5;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3b404d;
+}
+
+/* Accessible focus visible rings */
+:focus-visible {
+  outline: 2px solid #0f1012;
+  outline-offset: 3px;
+}
+.dark :focus-visible {
+  outline: 2px solid #f3f4f6;
+  outline-offset: 3px;
+}
+
+/* Floating Hero Digital Workspace Keyframes & Classes */
+@keyframes floatWorkspace {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.4deg);
+  }
+}
+
+@keyframes floatCard1 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-12px) translateX(4px);
+  }
+}
+
+@keyframes floatCard2 {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-4px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
+}
+
+.animate-float-workspace {
+  animation: floatWorkspace 7s ease-in-out infinite;
+}
+
+.animate-float-card1 {
+  animation: floatCard1 6s ease-in-out infinite 0.5s;
+}
+
+.animate-float-card2 {
+  animation: floatCard2 8s ease-in-out infinite 1s;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-workspace,
+  .animate-float-card1,
+  .animate-float-card2,
+  .animate-pulse-glow {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* Portrait entrance — one-shot, right → center (outer wrapper) */
+@keyframes portraitEnter {
+  0% {
+    opacity: 0;
+    transform: translateX(180px);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.portrait-enter {
+  animation: portraitEnter 2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+/* Portrait float — gentle up/down loop, starts after entrance (inner wrapper) */
+@keyframes portraitFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.portrait-float {
+  /* delay matches entrance duration so float begins the moment entrance ends */
+  animation: portraitFloat 4s ease-in-out infinite;
+  animation-delay: 2s;
+  animation-fill-mode: backwards;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portrait-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .portrait-float {
+    animation: none;
+    transform: none;
+  }
+}
+/* Hamza portrait — smooth bottom gradient fade */
+.hamza-portrait-gradient {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 55%,
+    rgba(0, 0, 0, 0.95) 65%,
+    rgba(0, 0, 0, 0.65) 78%,
+    rgba(0, 0, 0, 0.2) 92%,
+    transparent 100%
+  );
+
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 55%,
+    rgba(0, 0, 0, 0.95) 65%,
+    rgba(0, 0, 0, 0.65) 78%,
+    rgba(0, 0, 0, 0.2) 92%,
+    transparent 100%
+  );
+}
