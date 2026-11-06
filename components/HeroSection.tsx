@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import hamzaPortrait from '@/public/images/hamza.png';
 
 export function HeroSection() {
   return (
@@ -46,18 +47,18 @@ export function HeroSection() {
               {/* Inner: float animation (translateY) — isolated transform axis */}
               <div className="portrait-float relative w-full h-full">
                 <Image
-                  src="/images/hamza.png"
+                  src={hamzaPortrait}
                   alt="Hamza Teha — Software Developer"
                   fill
                   priority
                   sizes="(max-width: 640px) 270px, (max-width: 1024px) 350px, 430px"
                   className="
                     object-contain object-bottom
-                    grayscale
+                    grayscale group-hover:grayscale-0
                     hamza-portrait-gradient
                     drop-shadow-[0_20px_30px_rgba(0,0,0,0.16)]
-                    transition-all duration-500 ease-out
-                    group-hover:drop-shadow-[0_0_18px_rgba(34,197,94,0.85)]
+                    transition-all duration-700 ease-out
+                    group-hover:drop-shadow-[0_0_24px_rgba(34,197,94,0.6)]
                   "
                 />
               </div>
