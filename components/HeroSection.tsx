@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { ArrowDown, ArrowUpRight } from 'lucide-react';
-import hamzaPortrait from '@/public/images/hamza.png';
 
 export function HeroSection() {
   return (
@@ -47,7 +46,7 @@ export function HeroSection() {
               {/* Inner: float animation (translateY) — isolated transform axis */}
               <div className="portrait-float relative w-full h-full">
                 <Image
-                  src={hamzaPortrait}
+                  src="/images/hamza.png"
                   alt="Hamza Teha — Software Developer"
                   fill
                   priority
