@@ -5,8 +5,11 @@
  * - sendMessage()       → sends any text to a Telegram chat
  * - handleUpdate()      → decides what to reply based on what the user sent
  *
- * All responses use your real portfolio URL and stay professional & friendly.
- * No AI or database calls — that belongs to Phase 2.
+ * Changes from Phase 1 review:
+ *   - TELEGRAM_API URL built lazily per-call (avoids baking undefined into URL)
+ *   - escapeHtml() added — sanitises user-provided names before HTML insertion
+ *   - answerCallbackQuery() now logs failures instead of silently swallowing them
+ *   - getBotToken() helper centralises the missing-token guard
  */
 
 import type {
@@ -15,12 +18,44 @@ import type {
   InlineKeyboardMarkup,
 } from './types';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
+// ─── Portfolio URL ─────────────────────────────────────────────────────────────
+// CONFIRMED domain from your Vercel project.
+// If you rename the project, change this one line.
 const PORTFOLIO_URL = 'https://hamzateha-8abg.vercel.app';
-const TELEGRAM_API  = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`;
 
-// ─── Main keyboard (shown on /start, /help, and greetings) ───────────────────
+// ─── Token helper (lazy — read at call time, never at module load) ────────────
+
+function getApiBase(): string {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) {
+    throw new Error(
+      '[bot] TELEGRAM_BOT_TOKEN is not set. ' +
+      'Add it to .env.local (dev) or Vercel Environment Variables (production).'
+    );
+  }
+  return `https://api.telegram.org/bot${token}`;
+}
+
+// ─── HTML escaping ────────────────────────────────────────────────────────────
+
+/**
+ * Escapes the five characters that are special inside Telegram HTML messages.
+ * Always call this before inserting any user-provided string into a response.
+ *
+ * Example:
+ *   escapeHtml('<script>')  →  '&lt;script&gt;'
+ *   escapeHtml('O\'Brien')  →  'O&#39;Brien'
+ */
+function escapeHtml(raw: string): string {
+  return raw
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;')
+    .replace(/'/g,  '&#39;');
+}
+
+// ─── Main keyboard ────────────────────────────────────────────────────────────
 
 const MAIN_KEYBOARD: InlineKeyboardMarkup = {
   inline_keyboard: [
@@ -37,13 +72,11 @@ const MAIN_KEYBOARD: InlineKeyboardMarkup = {
 // ─── sendMessage ──────────────────────────────────────────────────────────────
 
 /**
- * Sends a message to a Telegram chat via the Bot API.
- * Returns the parsed JSON response from Telegram.
+ * Sends a message to a Telegram chat.
+ * Throws if the Telegram API returns a non-OK status.
  */
 export async function sendMessage(params: SendMessageParams): Promise<void> {
-  const url = `${TELEGRAM_API}/sendMessage`;
-
-  const res = await fetch(url, {
+  const res = await fetch(`${getApiBase()}/sendMessage`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify(params),
@@ -58,21 +91,37 @@ export async function sendMessage(params: SendMessageParams): Promise<void> {
 // ─── answerCallbackQuery ──────────────────────────────────────────────────────
 
 /**
- * Acknowledges a button press so Telegram stops showing the loading spinner.
+ * Acknowledges a button press so Telegram stops the loading spinner.
+ * Logs an error if the acknowledgement fails — never silently swallows it.
  */
 async function answerCallbackQuery(callbackQueryId: string): Promise<void> {
-  await fetch(`${TELEGRAM_API}/answerCallbackQuery`, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ callback_query_id: callbackQueryId }),
-  });
+  try {
+    const res = await fetch(`${getApiBase()}/answerCallbackQuery`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ callback_query_id: callbackQueryId }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(
+        `[bot] answerCallbackQuery failed (${res.status}): ${body}`
+      );
+    }
+  } catch (err) {
+    console.error('[bot] answerCallbackQuery threw:', err);
+  }
 }
 
-// ─── Response builders ────────────────────────────────────────────────────────
+// ─── Response text builders ───────────────────────────────────────────────────
 
-function startResponse(firstName: string): SendMessageParams['text'] {
+/**
+ * Safe welcome message — firstName is HTML-escaped before insertion.
+ */
+function startResponse(firstName: string): string {
+  const safeName = escapeHtml(firstName);
   return (
-    `👋 <b>Hello, ${firstName}!</b>\n\n` +
+    `👋 <b>Hello, ${safeName}!</b>\n\n` +
     `Welcome to <b>HamzaTeha Business Bot</b> — your direct line to Hamza Teha, ` +
     `a Freelance Full-Stack Developer based in Ethiopia.\n\n` +
     `I can help you explore Hamza's services, view his portfolio, or get in touch directly.\n\n` +
@@ -82,7 +131,7 @@ function startResponse(firstName: string): SendMessageParams['text'] {
 
 const HELP_TEXT =
   `📋 <b>Available Commands</b>\n\n` +
-  `/start      — Welcome message & main menu\n` +
+  `/start      — Welcome message &amp; main menu\n` +
   `/help       — Show this command list\n` +
   `/services   — View services offered\n` +
   `/portfolio  — Browse live projects\n\n` +
@@ -92,12 +141,12 @@ const HELP_TEXT =
 const SERVICES_TEXT =
   `🛠 <b>Services by Hamza Teha</b>\n\n` +
   `<b>1. Full-Stack Web Development</b>\n` +
-  `   Custom React & Next.js applications, responsive layouts, REST APIs\n\n` +
-  `<b>2. Backend & API Engineering</b>\n` +
+  `   Custom React &amp; Next.js applications, responsive layouts, REST APIs\n\n` +
+  `<b>2. Backend &amp; API Engineering</b>\n` +
   `   Node.js / Express servers, relational databases (PostgreSQL / MySQL), RBAC\n\n` +
-  `<b>3. UI/UX & Frontend Engineering</b>\n` +
+  `<b>3. UI/UX &amp; Frontend Engineering</b>\n` +
   `   Design systems, Tailwind CSS, accessible interfaces, micro-animations\n\n` +
-  `<b>4. Video Editing & Graphic Design</b>\n` +
+  `<b>4. Video Editing &amp; Graphic Design</b>\n` +
   `   Premiere Pro, After Effects, brand identity, social media assets\n\n` +
   `📌 Visit the full services page:\n${PORTFOLIO_URL}/#services`;
 
@@ -133,16 +182,16 @@ const FALLBACK_TEXT =
 // ─── handleUpdate ─────────────────────────────────────────────────────────────
 
 /**
- * Main entry point. Called by the webhook route for every incoming update.
- * Reads the update, decides the correct response, and sends it.
+ * Main entry point — called by the webhook route for every incoming update.
  */
 export async function handleUpdate(update: TelegramUpdate): Promise<void> {
-  // ── Handle button presses ──────────────────────────────────────────────────
+
+  // ── Button presses ─────────────────────────────────────────────────────────
   if (update.callback_query) {
     const { id, from, message, data } = update.callback_query;
     const chatId = message?.chat.id ?? from.id;
 
-    // Always acknowledge the callback so the button spinner stops
+    // Acknowledge first — stops the spinner even if sendMessage is slow
     await answerCallbackQuery(id);
 
     switch (data) {
@@ -161,75 +210,41 @@ export async function handleUpdate(update: TelegramUpdate): Promise<void> {
     return;
   }
 
-  // ── Handle text messages ───────────────────────────────────────────────────
+  // ── Text messages ──────────────────────────────────────────────────────────
   if (!update.message?.text) return;
 
   const { text, chat, from } = update.message;
   const chatId    = chat.id;
-  const firstName = from?.first_name ?? 'there';
+  const firstName = from?.first_name ?? 'there';   // raw — escapeHtml called inside startResponse
   const input     = text.trim().toLowerCase();
 
-  // /start
   if (input === '/start') {
-    await sendMessage({
-      chat_id:      chatId,
-      text:         startResponse(firstName),
-      parse_mode:   'HTML',
-      reply_markup: MAIN_KEYBOARD,
-    });
+    await sendMessage({ chat_id: chatId, text: startResponse(firstName), parse_mode: 'HTML', reply_markup: MAIN_KEYBOARD });
     return;
   }
 
-  // /help
   if (input === '/help') {
-    await sendMessage({
-      chat_id:      chatId,
-      text:         HELP_TEXT,
-      parse_mode:   'HTML',
-      reply_markup: MAIN_KEYBOARD,
-    });
+    await sendMessage({ chat_id: chatId, text: HELP_TEXT,      parse_mode: 'HTML', reply_markup: MAIN_KEYBOARD });
     return;
   }
 
-  // /services
   if (input === '/services') {
-    await sendMessage({
-      chat_id:      chatId,
-      text:         SERVICES_TEXT,
-      parse_mode:   'HTML',
-      reply_markup: MAIN_KEYBOARD,
-    });
+    await sendMessage({ chat_id: chatId, text: SERVICES_TEXT,  parse_mode: 'HTML', reply_markup: MAIN_KEYBOARD });
     return;
   }
 
-  // /portfolio
   if (input === '/portfolio') {
-    await sendMessage({
-      chat_id:      chatId,
-      text:         PORTFOLIO_TEXT,
-      parse_mode:   'HTML',
-      reply_markup: MAIN_KEYBOARD,
-    });
+    await sendMessage({ chat_id: chatId, text: PORTFOLIO_TEXT, parse_mode: 'HTML', reply_markup: MAIN_KEYBOARD });
     return;
   }
 
-  // Greetings: Hi, Hello, Salam (and common variations)
+  // Greetings
   const greetings = ['hi', 'hello', 'salam', 'hey', 'hii', 'helo', 'selam'];
   if (greetings.some((g) => input === g || input.startsWith(g + ' '))) {
-    await sendMessage({
-      chat_id:      chatId,
-      text:         startResponse(firstName),
-      parse_mode:   'HTML',
-      reply_markup: MAIN_KEYBOARD,
-    });
+    await sendMessage({ chat_id: chatId, text: startResponse(firstName), parse_mode: 'HTML', reply_markup: MAIN_KEYBOARD });
     return;
   }
 
-  // Unrecognised input
-  await sendMessage({
-    chat_id:      chatId,
-    text:         FALLBACK_TEXT,
-    parse_mode:   'HTML',
-    reply_markup: MAIN_KEYBOARD,
-  });
+  // Fallback
+  await sendMessage({ chat_id: chatId, text: FALLBACK_TEXT, parse_mode: 'HTML', reply_markup: MAIN_KEYBOARD });
 }
